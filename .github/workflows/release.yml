@@ -2,7 +2,7 @@
 
 on:
   release:
-    types: [published]
+    types: [published, edited]
 
 jobs:
   releases-matrix:
@@ -33,3 +33,4 @@ jobs:
         md5sum: FALSE
         asset_name: pack-${{ matrix.goos }}-${{ matrix.goarch }}
         compress_assets: OFF
+        overwrite: TRUE
