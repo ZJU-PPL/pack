@@ -28,3 +28,6 @@ jobs:
         goversion: "1.19"
         project_path: "."
         binary_name: "pack"
+        md5sum: FALSE
+        asset_name: pack-${{ matrix.goos }}-${{ matrix.goarch }}
+        compress_assets: OFF
