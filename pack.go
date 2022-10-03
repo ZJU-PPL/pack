@@ -1,60 +1,60 @@
 package main
 
 import (
+	"bytes"
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"zjuppl/stu/pack/util"
-	"bytes"
 )
 
-func contains[T comparable](s []T, e T) bool {
-	for _, v := range s {
-		if v == e {
+
+func topLevelJudge(topLevelAllowedReg []string, name string) bool {
+	for _, r := range topLevelAllowedReg {
+		b, _ := regexp.MatchString(r , name)
+		if b {
 			return true
 		}
 	}
 	return false
 }
 
-func getFiles(ignore_dirs []string, ignore_files []string) []string {
+func getFiles(topLevelAllowedReg []string) []string {
 	files, err := os.ReadDir(".")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	var ret []string
+	var fir []string
 	for _, f := range files {
 		name := f.Name()
+		if !topLevelJudge(topLevelAllowedReg, name) {
+			continue
+		}
 		if f.IsDir() {
-			if !contains(ignore_dirs, name) {
-				filepath.Walk(name, func(path string, info os.FileInfo, err error) error {
-					if err != nil {
-						log.Fatalln(err)
-					}
-					if !info.IsDir() {
-						path_slash := filepath.ToSlash(path)
-						ret = append(ret, path_slash)
-					}
-					return nil
-				})
-			}
+			filepath.Walk(name, func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					log.Fatalln(err)
+				}
+				if !info.IsDir() {
+					pathSlash := filepath.ToSlash(path)
+					fir = append(fir, pathSlash)
+				}
+				return nil
+			})
 		} else {
-			if !contains(ignore_files, name) {
-				ret = append(ret, name)
-			}
+			fir = append(fir, name)
 		}
 	}
-	return ret
+	return fir
 }
 
 func main() {
 
-	output_name := "stu-code.pgp.txt"
-	ignore_dirs := []string{"_build", ".git"}
-	myname := filepath.Base(os.Args[0])
-	ignore_files := []string{myname, output_name}
-
-	files := getFiles(ignore_dirs, ignore_files)
+	outputName := "stu-code.pgp.txt"
+	topLevelAllowedReg := []string{"lib", "bin", "test", "dune-project", `.*\.opam`}
+	
+	files := getFiles(topLevelAllowedReg)
 
 	var b bytes.Buffer
 
@@ -68,7 +68,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	f, err := os.Create(output_name)
+	f, err := os.Create(outputName)
 	if err != nil {
 		log.Fatalln(err)
 	}
