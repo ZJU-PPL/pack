@@ -32,7 +32,8 @@ func getFiles(ignore_dirs []string, ignore_files []string) []string {
 						log.Fatalln(err)
 					}
 					if !info.IsDir() {
-						ret = append(ret, path)
+						path_slash := filepath.ToSlash(path)
+						ret = append(ret, path_slash)
 					}
 					return nil
 				})
@@ -48,9 +49,10 @@ func getFiles(ignore_dirs []string, ignore_files []string) []string {
 
 func main() {
 
+	output_name := "stu-code.pgp.txt"
 	ignore_dirs := []string{"_build", ".git"}
 	myname := filepath.Base(os.Args[0])
-	ignore_files := []string{myname}
+	ignore_files := []string{myname, output_name}
 
 	files := getFiles(ignore_dirs, ignore_files)
 
@@ -66,7 +68,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	f, err := os.Create("stu-code.pgp.txt")
+	f, err := os.Create(output_name)
 	if err != nil {
 		log.Fatalln(err)
 	}
