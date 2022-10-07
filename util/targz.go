@@ -64,6 +64,8 @@ func AddToArchive(tw *tar.Writer, filename string) error {
 		return err
 	}
 
+	info.Mode()
+
 	// Create a tar Header from the FileInfo data
 	header, err := tar.FileInfoHeader(info, info.Name())
 	if err != nil {
@@ -75,6 +77,7 @@ func AddToArchive(tw *tar.Writer, filename string) error {
 	// not be preserved
 	// https://golang.org/src/archive/tar/common.go?#L626
 	header.Name = filename
+	header.Mode = 0644
 
 	// Write file header to the tar archive
 	err = tw.WriteHeader(header)
